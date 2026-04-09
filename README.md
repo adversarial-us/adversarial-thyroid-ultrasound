@@ -94,7 +94,7 @@ print(f"Defended Dice: {dice(defended_pred, mask_gt):.3f}")
 @article{dietrich2026adversarial,
   title={Adversarial Robustness of Deep Learning-Based Thyroid Nodule Segmentation in Ultrasound},
   author={Dietrich, Nicholas and McShannon, David},
-  journal={PLOS Digital Health},
+  journal={},
   year={2026}
 }
 ```
@@ -102,5 +102,3 @@ print(f"Defended Dice: {dice(defended_pred, mask_gt):.3f}")
 ## License
 
 This code is released under the MIT License. See [LICENSE](LICENSE) for details.
-
-The accompanying paper is published under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/) per PLOS policy.
