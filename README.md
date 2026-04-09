@@ -1,7 +1,5 @@
 # Adversarial Robustness of Deep Learning-Based Thyroid Nodule Segmentation in Ultrasound
 
-Code accompanying the paper published in PLOS Digital Health, 2026.
-
 **Authors:** Nicholas Dietrich, David McShannon
 
 **Corresponding Author:** Nicholas Dietrich, Temerty Faculty of Medicine, University of Toronto (nicholas.dietrich@mail.utoronto.ca)
