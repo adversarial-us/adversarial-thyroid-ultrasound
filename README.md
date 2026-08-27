@@ -6,11 +6,12 @@
 
 ## Overview
 
-This repository provides implementations of two black-box adversarial attacks and three inference-time defenses for ultrasound segmentation, as described in the paper.
+This repository provides implementations of two ultrasound-specific black-box adversarial attacks, one standard baseline attack, and three inference-time defenses for ultrasound segmentation, as described in the paper.
 
 **Attacks:**
 - Structured Speckle Amplification Attack (SSAA) — boundary-targeted multiplicative speckle noise
 - Frequency-Domain Ultrasound Attack (FDUA) — Butterworth bandpass-filtered phase perturbations
+- SimBA baseline (Guo et al., ICML 2019) — pixel-basis black-box comparison attack
 
 **Defenses:**
 - Randomized Preprocessing with Test-Time Augmentation
@@ -33,6 +34,7 @@ pip install -r requirements.txt
 ├── model.py        # U-Net segmentation architecture
 ├── train.py        # Model training script
 ├── attacks.py      # SSAA and FDUA attack implementations
+├── simba.py        # SimBA baseline comparison attack
 ├── defenses.py     # Three inference-time defense strategies
 ├── metrics.py      # Evaluation metrics (Dice, IoU, SSIM, HD95)
 ├── config.py       # Hyperparameters
@@ -56,6 +58,7 @@ import numpy as np
 import torch
 from model import UNet
 from attacks import ssaa_attack, fdua_attack
+from simba import simba_attack
 from defenses import predict_with_defense
 from metrics import predict, dice
 
@@ -70,23 +73,24 @@ model.eval()
 frame = ...   # float32 numpy array, shape (256, 256), range [0, 1]
 mask_gt = ... # binary numpy array, shape (256, 256)
 
-# Run SSAA attack
-adv_image, attack_results = ssaa_attack(frame, mask_gt, model, device)
-print(f"SSAA Dice drop: {attack_results['dice_drop']:.3f}")
+# Run attacks
+adv_ssaa, results_ssaa = ssaa_attack(frame, mask_gt, model, device)
+adv_fdua, results_fdua = fdua_attack(frame, mask_gt, model, device)
+adv_simba, results_simba = simba_attack(frame, mask_gt, model, device)
 
 # Evaluate defense on attacked image
-defended_pred = predict_with_defense(model, adv_image, device, defense="defense2")
+defended_pred = predict_with_defense(model, adv_ssaa, device, defense="defense2")
 print(f"Defended Dice: {dice(defended_pred, mask_gt):.3f}")
 ```
 
 ## Attack Parameters
 
-| Parameter | SSAA | FDUA |
-|-----------|------|------|
-| Query budget | 500 (50 iter × 10 pop) | 500 (50 iter × 10 pop) |
-| Amplitude | 0.03–0.20 | 0.05–0.50 (epsilon) |
-| Spatial extent | sigma 3–30 px, offset 0–15 px | Low: 5–38 cycles, High: 38–102 cycles |
-| Noise model | Rayleigh (multiplicative) | Phase noise [-π, π] (multiplicative) |
+| Parameter | SSAA | FDUA | SimBA |
+|-----------|------|------|-------|
+| Query budget | 500 (50 iter × 10 pop) | 500 (50 iter × 10 pop) | 500 |
+| Amplitude | 0.03–0.20 | 0.05–0.50 (epsilon) | 0.05 (step size) |
+| Spatial extent | sigma 3–30 px, offset 0–15 px | Low: 5–38 cycles, High: 38–102 cycles | Single pixel |
+| Noise model | Rayleigh (multiplicative) | Phase noise [-π, π] | Additive ±epsilon |
 
 ## Citation
 
